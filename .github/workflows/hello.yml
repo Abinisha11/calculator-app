@@ -1,0 +1,74 @@
+name: Calculator CI Pipeline
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+
+  say-hello:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Say hello
+        run: echo "Hello from GitHub Actions"
+
+
+  test-calculator:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run calculator tests
+        run: python -m unittest -v
+
+
+  syntax-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Check Python syntax
+        run: |
+          python -m py_compile calculator.py
+          python -m py_compile test_calculator.py
+
+
+  build-check:
+    runs-on: ubuntu-latest
+
+    needs:
+      - test-calculator
+      - syntax-check
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Create build folder
+        run: mkdir build
+
+      - name: Copy files
+        run: |
+          cp calculator.py build/
+          cp test_calculator.py build/
+
+      - name: Show build files
+        run: ls -la build
